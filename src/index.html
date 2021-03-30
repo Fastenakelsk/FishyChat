@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+      #input:focus { outline: none; }
+      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li:nth-child(odd) { background: #efefef; }
+
+      #onlineUsers { list-style-type: none; margin: 0; padding: 0; }
+      #onlineUsers > li { padding: 0.5rem 1rem; }
+      #onlineUsers > li:nth-child(odd) { background: #efefef; }
+    </style>
+  </head>
+  <body>
+    <ul id="onlineUsers"></ul>
+    <hr>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+      var commandChangeNickname = '!nick';
+    
+      // Sends the event to the server
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value.substring(0, commandChangeNickname.length) == commandChangeNickname) {
+          // Sends the new nickname to the server
+          socket.emit('change nickname', input.value.substring(commandChangeNickname.length + 1));
+        } else if (input.value) {
+          // Sends the chat message to the server
+          socket.emit('chat message', input.value);
+        }
+        input.value = '';
+      });
+
+      // Receives a chat message from the server
+      socket.on('chat message', function(message) {
+        var item = document.createElement('li');
+        item.textContent = message;
+        messages.appendChild(item);
+      });
+
+      // Receives the list of all users from the server
+      socket.on('new connection', function(users) {
+        console.log(users);
+        var user = document.createElement('li');
+        user.textContent = users[users.length - 1].id;
+        onlineUsers.appendChild(user);
+      });
+
+      // Receives the new nickname from the server and updates the list
+      socket.on('update users', function(users){
+        onlineUsers.innerHTML = '';
+        users.forEach(x => {
+          var user = document.createElement('li');
+          user.textContent = x.nickname;
+          onlineUsers.appendChild(user);
+        })
+      });
+    </script>
+  </body>
+</html>
