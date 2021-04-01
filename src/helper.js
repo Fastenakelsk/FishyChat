@@ -7,13 +7,12 @@ const updateUsers = (io) => io.emit('update users', users);
 
 const newUserConnection = (io, person) => {
   users.push(person);
-  console.log(users);
-  io.emit('new connection', users);
+  updateUsers(io);
   io.emit('chat message', `${currentTime()} | ${person.nickname} has connected`);
 };
 
 const userDisconnect = (io, person) => {
-  users.splice(users.map((u) => u.nickname).indexOf(person.nickname));
+  users.splice(users.map((u) => u.id).indexOf(person.id));
   updateUsers(io);
   io.emit('chat message', `${currentTime()} | ${person.nickname} has disconnected`);
 };

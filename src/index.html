@@ -27,12 +27,26 @@
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
-    <script>
+    <script type="text/javascript">
       var socket = io();
 
       var form = document.getElementById('form');
       var input = document.getElementById('input');
       var commandChangeNickname = '!nick';
+
+      // Add message to list
+      function AddMessage(message){
+        var item = document.createElement('li');
+        item.textContent = message;
+        messages.appendChild(item);
+      }
+
+      // Add message to list
+      function AddUser(nickname){
+        var item = document.createElement('li');
+        item.textContent = nickname;
+        onlineUsers.appendChild(item);
+      }
     
       // Sends the event to the server
       form.addEventListener('submit', function(e) {
@@ -49,26 +63,18 @@
 
       // Receives a chat message from the server
       socket.on('chat message', function(message) {
-        var item = document.createElement('li');
-        item.textContent = message;
-        messages.appendChild(item);
+        AddMessage(message);
+        //var audio = new Audio('https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3');
+        //var audio = new Audio('src/assets/notification.wav');
+        //audio.play();
       });
 
-      // Receives the list of all users from the server
-      socket.on('new connection', function(users) {
-        console.log(users);
-        var user = document.createElement('li');
-        user.textContent = users[users.length - 1].id;
-        onlineUsers.appendChild(user);
-      });
-
-      // Receives the new nickname from the server and updates the list
+      // Updates the list of online users
       socket.on('update users', function(users){
         onlineUsers.innerHTML = '';
+        console.log(users);
         users.forEach(x => {
-          var user = document.createElement('li');
-          user.textContent = x.nickname;
-          onlineUsers.appendChild(user);
+          AddUser(x.nickname);
         })
       });
     </script>

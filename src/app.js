@@ -20,13 +20,10 @@ io.on('connection', (socket) => {
     socket.person.nickname = nickname;
     changeNickname(io, socket.person);
   });
-  // Send a chat message
   socket.on('chat message', (messsage) => {
     sendMessage(io, socket.person, messsage);
   });
-  // New connection message
   newUserConnection(io, socket.person);
-  // Disconnect message
   socket.on('disconnect', () => {
     userDisconnect(io, socket.person);
   });
